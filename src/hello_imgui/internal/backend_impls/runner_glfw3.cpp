@@ -71,7 +71,31 @@ namespace HelloImGui
     {
         BackendApi::BackendOptions backendOptions;
         backendOptions.rendererBackendType = params.rendererBackendType;
+
+#if defined(GLFW_FLOATBUFFER)
+        // Request a floating-point framebuffer for HDR/EDR display output, if asked for and supported by
+        // the linked GLFW (GLFW_FLOATBUFFER is only defined by HDR-enabling forks, see hasEdrSupport() in
+        // renderer_backend_options.cpp). Not every GPU/driver actually supports this even when GLFW itself
+        // does, so retry without it -- rather than failing to launch entirely -- if window creation fails.
+        bool wantsFloatBuffer = params.rendererBackendOptions.requestFloatBuffer;
+        if (wantsFloatBuffer)
+            glfwWindowHint(GLFW_FLOATBUFFER, GLFW_TRUE);
+        try
+        {
+            mWindow = mBackendWindowHelper->CreateWindow(params.appWindowParams, backendOptions, renderCallbackDuringResize);
+        }
+        catch (const std::runtime_error &)
+        {
+            if (!wantsFloatBuffer)
+                throw;
+            glfwWindowHint(GLFW_FLOATBUFFER, GLFW_FALSE);
+            params.rendererBackendOptions.requestFloatBuffer = false;
+            mWindow = mBackendWindowHelper->CreateWindow(params.appWindowParams, backendOptions, renderCallbackDuringResize);
+        }
+#else
         mWindow = mBackendWindowHelper->CreateWindow(params.appWindowParams, backendOptions, renderCallbackDuringResize);
+#endif
+
         params.backendPointers.glfwWindow = mWindow;
     }
 
