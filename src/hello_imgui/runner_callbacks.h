@@ -241,6 +241,15 @@ struct RunnerCallbacks
     //  ImGui::Render() (which will also call ImGui::EndFrame()).
     VoidFunction BeforeImGuiRender = EmptyVoidFunction();
 
+    // `BeforeSwap`: You can here add a function that will be called at each frame,
+    //  after ImGui's draw data has been rendered to the 3D backend, but before the frame
+    //  is presented (swapped). This is the place for a final full-screen post-process
+    //  pass over the whole frame (e.g. a color-management pass that reads back an
+    //  offscreen target you rendered CustomBackground/Gui content into, and writes the
+    //  final colors to the real backbuffer) -- anything drawn here ends up in the
+    //  presented frame, unlike AfterSwap.
+    VoidFunction BeforeSwap = EmptyVoidFunction();
+
     // `AfterSwap`: You can here add a function that will be called at each frame,
     //  after the Gui was rendered and swapped to the screen.
     VoidFunction AfterSwap = EmptyVoidFunction();

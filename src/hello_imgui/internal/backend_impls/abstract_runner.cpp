@@ -1240,6 +1240,9 @@ void AbstractRunner::CreateFramesAndRender(bool insideReentrantCall)
         ImGui::Render();
         mRenderingBackendCallbacks->Impl_RenderDrawData_To_3D();
 
+        if (params.callbacks.BeforeSwap)
+            params.callbacks.BeforeSwap();
+
         if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
             Impl_UpdateAndRenderAdditionalPlatformWindows();
 
