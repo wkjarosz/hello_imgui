@@ -62,6 +62,15 @@ namespace HelloImGui
             // This glfw behaviour is for Mac only, and interferes with our multiplatform assets handling
             glfwInitHint(GLFW_COCOA_CHDIR_RESOURCES, GLFW_FALSE);
         #endif
+        #ifdef GLFW_WAYLAND_COLOR_MANAGEMENT
+            // Only defined by HDR-enabling GLFW forks (see hasEdrSupport() in renderer_backend_options.cpp).
+            // Defaults off, so without this hint Wayland never negotiates HDR/wide-gamut output. Gated on
+            // requestFloatBuffer (already decided before HelloImGui::Run()): once color management is on,
+            // the compositor tags every surface's color space, not just float-buffer ones, so an ordinary
+            // SDR window could get negotiated into a non-default color space for no benefit.
+            if (params.rendererBackendOptions.requestFloatBuffer)
+                glfwInitHint(GLFW_WAYLAND_COLOR_MANAGEMENT, GLFW_TRUE);
+        #endif
         bool glfwInitSuccess = glfwInit();
         (void) glfwInitSuccess;
         IM_ASSERT(glfwInitSuccess);
